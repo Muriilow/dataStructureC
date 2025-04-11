@@ -11,9 +11,11 @@ struct node
 };
 
 
-struct node* nodeCreate(int key);
+struct node* nodeCreate(int key, struct node* dad);
 
-struct node* binary(struct node* n, int key, struct node* dad);
+struct node* nodeInsert(struct node* n, int key, struct node* dad);
+
+struct node* nodeSearch(struct node* n, int key);
 
 void destroyTree(struct node* n);
 
@@ -31,4 +33,7 @@ void printTreePreOrder(struct node* n);
     
 void printTreePosOrder(struct node* n);
 
+void nodeDelete(struct node* root, struct node* n);
+
+void nodeTransplant(struct node* u, struct node* v);
 #endif

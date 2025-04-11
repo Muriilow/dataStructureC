@@ -2,39 +2,57 @@
 #include <stdlib.h>
 #include "tree.h"
 
-struct node* nodeCreate(int key)
+struct node* nodeCreate(int key, struct node* dad)
 {
     struct node* n = malloc(sizeof(struct node));
 
     n->key = key;
     n->left = NULL;
     n->right = NULL;
-    n->dad = NULL;
+    n->dad = dad;
 
     return n;
 }
 
-struct node* binary(struct node* n, int key, struct node* dad)
+struct node* nodeSearch(struct node* n, int key)
 {
     if(n == NULL)
+        return NULL;
+
+    if(n->key == key)
+        return n;
+
+    if(n->key > key)
+        return nodeSearch(n->left, key);
+
+    return nodeSearch(n->right, key);
+}
+
+struct node* nodeInsert(struct node* n, int key, struct node* dad)
+{
+    struct node* temp;
+    if(n == NULL)
     {
-        n = nodeCreate(key);
-        n->dad = dad;
-
-        if(dad->key > n->key)
-            dad->left = n;
-
-        else if(dad->key <= n->key)
-            dad->right = n;
-
+        n = nodeCreate(key, dad);
         return n;
     }
 
     if(n->key > key)
-        return binary(n->left, key, n);
+    {
+        temp = nodeInsert(n->left, key, n);
 
+        if(n->left == NULL)
+            n->left = temp;
 
-    return binary(n->right, key, n);
+        return n->left;
+    }
+
+    temp = nodeInsert(n->right, key, n);
+
+    if(n->right == NULL)
+        n->right = temp;
+
+    return n->right;
 }
 
 void printTreeInOrder(struct node* n)
@@ -146,4 +164,40 @@ struct node* rightRotation(struct node* x)
     x->dad = y;
 
     return y;
+}
+
+void nodeTransplant(struct node* u, struct node* v)
+{
+    if(u == u->dad->left)
+        u->dad->left = v;
+    else if(u == u->dad->right)
+        u->dad->right = v;
+
+    if(v != NULL)
+        v->dad = u->dad;
+
+}
+
+/*Deleting node n at the tree*/
+void nodeDelete(struct node* root, struct node* n)
+{
+    struct node* temp;
+
+    if(n->left == NULL)
+        nodeTransplant(n, n->right);
+    else if(n->right == NULL)
+        nodeTransplant(n, n->left);
+    else
+    {
+        temp = findMin(n->right);
+        if(temp->dad != n)
+        {
+            nodeTransplant(temp, temp->right);
+            temp->right = n->right;
+            temp->right->dad = n;
+        }
+        nodeTransplant(n, temp);
+        temp->left = n->left;
+        temp->left->dad = n;
+    }
 }
